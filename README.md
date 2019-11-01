@@ -6,3 +6,8 @@ Raspberry pi cubesat software. Original software used Aurduinos which quickly ra
 - PyCharm Professional - This project uses PyCharm Professional for the remote interpreter along with deployment.
 - Two raspberry pi's model 3 and up.
 
+## Setup
+
+* Enable ssh on both pi's and both are able to be connected to via ssh. Hook up ethernet cable, connect to wifi, etc.
+* Go to `File -> Settings -> Build, Execution, Deployment -> Deployment`
+
