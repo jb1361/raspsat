@@ -26,8 +26,8 @@ Type `ifconfig` into the terminal of the pi's to get the ip.
 
 ![Add Interpreter](./assets/images/enter-ssh-intepreter-details.png)
 
-* You will now have an interpreter to run on either of the pi's. You can alternatively use the local virtual environment
-then deploy and install required packages on the pi's
+* Repeat this for the other pi
+* You will now have an interpreter to run on either of the pi's.
 
 ### Setting Up Deployment
 * Go to `File -> Settings -> Build, Execution, Deployment -> Deployment`
