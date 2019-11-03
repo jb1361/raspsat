@@ -20,4 +20,7 @@ class CommandLine:
             print('-Commands-')
             print(COMMANDS.keys())
             return
-        await TRANSMIT_COMMANDS[COMMANDS[command]](self.rf_controller)
+        try:
+            await TRANSMIT_COMMANDS[COMMANDS[command]](self.rf_controller)
+        except Exception as e:
+            print('Invalid Command')
