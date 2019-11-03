@@ -5,42 +5,45 @@ import signal
 import sys
 import time
 import logging
+import asyncio
 
+class RfController:
 
-class RfController (threading.Thread):
-
-    def __init__(self, thread_id, name):
-        threading.Thread.__init__(self)
-        self.threadID = thread_id
-        self.name = name
+    def __init__(self):
         self.rfReceiver = RFDevice(27)
+        self.rfReceiver.enable_rx()
         self.rfTransmitter = RFDevice(17)
+        self.rfTransmitter.enable_tx()
         self.rfTransmitter.tx_repeat = 10
         self.timestamp = None
-        log_info_message('Starting ' + self.name)
-
+        self.rx = None
 
     def exithandler(self, signal, frame):
         self.rfReceiver.cleanup()
         self.rfTransmitter.cleanup()
         sys.exit(0)
 
-    def receive(self):
-        log_info_message('Enabling Receiver')
-        self.rfTransmitter.disable_tx()
-        self.rfReceiver.enable_rx()
+    async def receive(self):
         while True:
             if self.rfReceiver.rx_code_timestamp != self.timestamp:
-                self.timestamp = self.rfReceiver.rx_code_timestamp
-                logging.info(str(self.rfReceiver.rx_code) +
-                             " [pulselength " + str(self.rfReceiver.rx_pulselength) +
-                             ", protocol " + str(self.rfReceiver.rx_proto) + "]")
-            time.sleep(0.01)
+                if self.valid_rx(self.rfReceiver.rx_pulselength, self.rfReceiver.rx_proto):
+                    self.timestamp = self.rfReceiver.rx_code_timestamp
+                    logging.info(str(self.rfReceiver.rx_code) +
+                                 " [pulselength " + str(self.rfReceiver.rx_pulselength) +
+                                 ", protocol " + str(self.rfReceiver.rx_proto) + "]")
+            await asyncio.sleep(0.01)
 
-    def send(self, data):
+    def valid_rx(self, pulse_length, protocol):
+        if 349 <= pulse_length <= 354 and protocol == 1:
+            return True
+        else:
+            return False
+
+    async def get_response(self, expected_response):
+        if self.rfReceiver.rx_code == expected_response:
+            return self.rfReceiver.rx_code
+
+    async def send(self, data):
         log_info_message('Sending ' + str(data))
-        self.rfReceiver.disable_rx()
-        self.rfTransmitter.enable_tx()
         self.rfTransmitter.tx_code(data, 1)
-        self.rfTransmitter.disable_tx()
         log_info_message('Sent Data')
