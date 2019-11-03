@@ -1,10 +1,16 @@
-#!/usr/bin/env python3
+from Util.LoggingHelper import log_info_message
+import RfCommunications.RfController as rfController
+import threading
 
-import argparse
-import logging
+log_info_message('Starting Ground Control')
+
+threadLock = threading.Lock()
+threads = []
+RfControllerThread = rfController.RfController(1, 'RfControllerThread')
+RfControllerThread.start()
 
 
-logging.basicConfig(level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S',
-                    format='%(asctime)-15s - [%(levelname)s] %(module)s: %(message)s',)
 
-logging.info('Starting Ground Control')
+RfControllerThread.send(123)
+RfControllerThread.receive()
+threads.append(RfControllerThread)
