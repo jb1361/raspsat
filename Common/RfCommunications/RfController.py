@@ -14,7 +14,7 @@ class RfController:
         self.rfReceiver = RFDevice(27)
         self.rfReceiver.enable_rx()
         self.rfTransmitter = RFDevice(17)
-        self.rfTransmitter.tx_repeat = 10
+        self.rfTransmitter.tx_repeat = 20
         self.timestamp = None
 
     def exithandler(self, signal, frame):
@@ -22,13 +22,16 @@ class RfController:
         self.rfTransmitter.cleanup()
         sys.exit(0)
 
-    async def receive(self, timeout = None):
+    async def receive(self, timeout = None, expected_response = None):
         start = datetime.now()
         while True:
             if self.rfReceiver.rx_code_timestamp != self.timestamp:
                 if self.valid_rx(self.rfReceiver.rx_pulselength, self.rfReceiver.rx_proto):
                     self.timestamp = self.rfReceiver.rx_code_timestamp
-                    break
+                    if self.rfReceiver.rx_code == expected_response:
+                        break
+                    elif not expected_response:
+                        break
             if timeout:
                 diff = (datetime.now() - start).seconds
                 if diff > timeout:
@@ -43,22 +46,26 @@ class RfController:
         else:
             return False
 
-    async def get_response(self, timeout = None):
-        return await self.receive(timeout)
+    async def get_response(self, timeout = None, expected_response = None):
+        return await self.receive(timeout, expected_response)
 
     async def send(self, data):
-        log_info_message('Sending ' + str(data))
-        self.rfReceiver.disable_rx()
-        await asyncio.sleep(0.01)
-        self.rfTransmitter.enable_tx()
-        await asyncio.sleep(0.01)
-        self.rfTransmitter.tx_code(data, 1)
-        await asyncio.sleep(0.01)
-        self.rfTransmitter.disable_tx()
-        await asyncio.sleep(0.01)
-        self.rfReceiver.enable_rx()
-        log_info_message('Sent Data')
-        await asyncio.sleep(1)
+        try:
+            log_info_message('Sending ' + str(data))
+            self.rfReceiver.disable_rx()
+            await asyncio.sleep(0.01)
+            self.rfTransmitter.enable_tx()
+            await asyncio.sleep(0.01)
+            self.rfTransmitter.tx_code(data, 1)
+            await asyncio.sleep(0.01)
+            self.rfTransmitter.disable_tx()
+            await asyncio.sleep(0.01)
+            self.rfReceiver.enable_rx()
+            log_info_message('Sent Data')
+            await asyncio.sleep(1)
+        except Exception as e:
+            print('Exception while sending - retrying: ' + str(e))
+            await self.send(data)
 
     def exit(self):
         self.rfTransmitter.cleanup()

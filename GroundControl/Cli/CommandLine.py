@@ -1,10 +1,10 @@
 from Util.LoggingHelper import log_info_message
 import threading
-from Cli.Commands import ping
+from Cli.Commands import ping, start_reaction_wheels, stop_reaction_wheels, get_reaction_wheel_status
 import asyncio
 
-COMMANDS = {'help': -1, 'ping': 1}
-TRANSMIT_COMMANDS = {1: ping.ping}
+COMMANDS = {'help': -1, 'ping': 1, 'startReactionWheels': 5, 'stopReactionWheels': 6, 'getReactionWheelStatus': 7}
+TRANSMIT_COMMANDS = {1: ping.ping, 5: start_reaction_wheels.start_reaction_wheels, 6: stop_reaction_wheels.stop_reaction_wheels, 7: get_reaction_wheel_status.get_reaction_wheel_status}
 
 class CommandLine:
     def __init__(self, rf_controller):

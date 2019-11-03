@@ -1,7 +1,7 @@
 import logging
 
 
-logging.basicConfig(level=logging.DEBUG, datefmt='%Y-%m-%d %H:%M:%S',
+logging.basicConfig(level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S',
                     format='%(asctime)-15s - [%(levelname)s] %(module)s: %(message)s',)
 
 
